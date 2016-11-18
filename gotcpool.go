@@ -72,7 +72,7 @@ func (p *Tcpool)_Take() *net.TCPConn {
 		}
 	}
 
-	panic("Take conntect occur a wrong")
+	panic("Taking conntect occurs a unkown wrong")
 }
 
 func (p *Tcpool)_Revert(c *net.TCPConn) {
