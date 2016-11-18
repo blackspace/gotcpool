@@ -36,7 +36,7 @@ func (p *Tcpool)NewConnect() *net.TCPConn {
 
 func (p *Tcpool)Do(f func(c *net.TCPConn)) {
 	c:=p._Take()
-	defer p._Back(c)
+	defer p._Revert(c)
 	f(c)
 }
 
@@ -51,6 +51,6 @@ func (p *Tcpool)_Take() *net.TCPConn{
 	return nil
 }
 
-func (p *Tcpool)_Back(c *net.TCPConn) {
+func (p *Tcpool)_Revert(c *net.TCPConn) {
 	p._connects<-c
 }
