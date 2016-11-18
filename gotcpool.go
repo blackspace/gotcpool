@@ -25,7 +25,6 @@ func NewTcpool(addr string,len int) *Tcpool {
 
 		return p
 	}
-
 }
 
 
@@ -43,7 +42,7 @@ func (p *Tcpool)Do(f func(c *net.TCPConn)) {
 	f(c)
 }
 
-func (p *Tcpool)PoolLen() int {
+func (p *Tcpool)_PoolLen() int {
 	return len(p._connects)
 }
 

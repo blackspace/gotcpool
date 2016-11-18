@@ -41,7 +41,7 @@ func TestTcpool_Do(t *testing.T) {
 
 	wg.Wait()
 
-	if tcpool.PoolLen()!=100 {
+	if tcpool._PoolLen()!=100 {
 		t.Fail()
 	}
 
@@ -54,7 +54,7 @@ func TestTcpool_Do(t *testing.T) {
 		if err != nil  {
 			panic(err)
 		}
-		if tcpool.PoolLen()!=99 {
+		if tcpool._PoolLen()!=99 {
 			t.Fail()
 		}
 	})
@@ -68,12 +68,12 @@ func TestTcpool_Do(t *testing.T) {
 		if err != nil  {
 			panic(err)
 		}
-		if tcpool.PoolLen()!=99 {
+		if tcpool._PoolLen()!=99 {
 			t.Fail()
 		}
 	})
 
-	if tcpool.PoolLen()!=100 {
+	if tcpool._PoolLen()!=100 {
 		t.Fail()
 	}
 }
