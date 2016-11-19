@@ -6,22 +6,28 @@ import (
 )
 
 type Tcpool struct {
-	_addr     *net.TCPAddr
-	_connects chan *net.TCPConn
-	_len      int
-	_created_number  int
-	_creat_mutex sync.Mutex
+	_addr           *net.TCPAddr
+	_connects       chan *net.TCPConn
+	_max_len        int
+	_created_number int
+	_creat_mutex    sync.Mutex
 }
 
-func NewTcpool(addr string,len int) *Tcpool {
+func NewTcpool(addr string, min_len int,max_len int) *Tcpool {
+	if min_len>max_len {
+		panic("min_len must be smaller than max_len")
+	}
+
 	if a,err:=net.ResolveTCPAddr("tcp",addr);err!=nil {
 		panic(err)
 	} else {
-		p:=&Tcpool{_addr:a,_connects:make(chan *net.TCPConn,len),_len:len}
+		p:=&Tcpool{_addr:a,_connects:make(chan *net.TCPConn, max_len), _max_len:max_len}
 
-		c,_:=p._CreateConnect()
+		for i:=0;i<min_len;i++ {
+			c,_:=p._CreateConnect()
 
-		p._connects<-c
+			p._connects<-c
+		}
 
 		return p
 	}
@@ -49,7 +55,7 @@ func (p *Tcpool)_PoolLen() int {
 func (p *Tcpool)_CreateConnect()  (c *net.TCPConn,all_done bool) {
 	p._creat_mutex.Lock()
 	defer p._creat_mutex.Unlock()
-	if p._created_number<100 {
+	if p._created_number<p._max_len {
 		c=p._NewConnect()
 		p._created_number++
 		return c,false

@@ -8,9 +8,10 @@ import (
 	"net"
 	"sync"
 	"testing"
+	"os"
 )
 
-func TestTcpool_Do(t *testing.T) {
+func TestMain(m *testing.M) {
 	command.Commands.RegistCommand("hello", func(clt *client.Client, args ...string) string {
 		return "hello,I am a robot"
 	}, "say hello")
@@ -19,18 +20,29 @@ func TestTcpool_Do(t *testing.T) {
 	s.Start("127.0.0.1", "5050")
 	defer s.Stop()
 
-	tcpool:=NewTcpool("127.0.0.1:5050",100)
+	os.Exit(m.Run())
+}
+
+func TestTcpool_Do(t *testing.T) {
+	max_len:=1000
+	tcpool:=NewTcpool("127.0.0.1:5050",10,max_len)
+
+	if tcpool._PoolLen()!=10 {
+		t.Log(tcpool._PoolLen())
+		t.Fail()
+	}
 
 	wg:=sync.WaitGroup{}
 
-	wg.Add(1000)
+	wg.Add(max_len*2)
 
-	for i:=0;i<1000;i++ {
+	for i:=0;i<max_len*2;i++ {
 		go tcpool.Do(func(c *net.TCPConn) {
 			c.Write([]byte("hello\r\n"))
 
 			buf := make([]byte, 256)
 			_, err := c.Read(buf)
+
 
 			if err != nil {
 				panic(err)
@@ -41,7 +53,9 @@ func TestTcpool_Do(t *testing.T) {
 
 	wg.Wait()
 
-	if tcpool._PoolLen()!=100 {
+
+	if tcpool._PoolLen()!=max_len {
+		t.Log(tcpool._PoolLen())
 		t.Fail()
 	}
 
@@ -54,7 +68,8 @@ func TestTcpool_Do(t *testing.T) {
 		if err != nil  {
 			panic(err)
 		}
-		if tcpool._PoolLen()!=99 {
+		if tcpool._PoolLen()!=max_len-1 {
+			t.Log(tcpool._PoolLen())
 			t.Fail()
 		}
 	})
@@ -68,12 +83,14 @@ func TestTcpool_Do(t *testing.T) {
 		if err != nil  {
 			panic(err)
 		}
-		if tcpool._PoolLen()!=99 {
+		if tcpool._PoolLen()!=max_len-1{
+			t.Log(tcpool._PoolLen())
 			t.Fail()
 		}
 	})
 
-	if tcpool._PoolLen()!=100 {
+	if tcpool._PoolLen()!=max_len {
+		t.Log(tcpool._PoolLen())
 		t.Fail()
 	}
 }
